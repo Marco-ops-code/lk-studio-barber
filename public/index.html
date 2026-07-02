@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0f0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>LK Studio BarberShop</title>
+  <link rel="icon" href="/assets/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/premium.css" />
+</head>
+<body>
+  <div id="appLoader" class="app-loader" aria-hidden="true">
+    <img src="/assets/logo.png" alt="LK Studio" class="loader-logo" width="140" height="140" />
+    <div class="loader-bar"><span></span></div>
+  </div>
+
+  <div class="app">
+    <!-- Sidebar desktop -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-block">
+        <img src="/assets/logo.png" alt="LK Studio — Précision. Style. Confiance." class="brand-logo" width="200" height="200" />
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Navigation principale">
+        <button class="nav-btn active" data-panel="reserve" type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Réserver</span>
+        </button>
+        <button class="nav-btn" data-panel="dashboard" data-admin type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          <span>Tableau de bord</span>
+        </button>
+        <button class="nav-btn" data-panel="agenda" data-admin type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          <span>Agenda</span>
+        </button>
+        <button class="nav-btn" data-panel="clients" data-admin type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Clients</span>
+        </button>
+        <button class="nav-btn" data-panel="settings" data-admin type="button">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <span>Paramètres</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="themeToggle" class="theme-toggle" type="button">
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span class="theme-label">Mode clair</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+
+    <div class="app-body">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuToggle" class="icon-btn menu-btn" type="button" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <p class="topbar-eyebrow">Précision · Style · Confiance</p>
+            <h1 id="pageTitle">Réserver un créneau</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span id="statusBadge" class="badge live">En ligne</span>
+          <span id="adminBadge" class="badge admin" hidden>Admin</span>
+          <button id="adminLoginBtn" class="btn btn-ghost btn-sm" type="button">Connexion admin</button>
+        </div>
+      </header>
+
+      <main class="main">
+        <div id="connectionBanner" class="connection-banner" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="banner-body">
+            <span class="banner-text">Serveur injoignable</span>
+            <span class="banner-hint small"></span>
+          </div>
+          <a href="http://localhost:3000" class="btn btn-primary btn-sm">Ouvrir l'app</a>
+          <button type="button" id="retryConnection" class="btn btn-secondary btn-sm">Réessayer</button>
+        </div>
+        <!-- RÉSERVATION -->
+        <section id="panel-reserve" class="panel active">
+          <div class="welcome-banner welcome-hero animate-in">
+            <div class="welcome-hero-bg" aria-hidden="true">
+              <img src="/assets/hero-barber.jpg" alt="" class="welcome-hero-img" width="1920" height="1080" loading="eager" />
+            </div>
+            <div class="welcome-hero-overlay" aria-hidden="true"></div>
+            <div class="welcome-grain" aria-hidden="true"></div>
+            <div class="welcome-content">
+              <img src="/assets/logo.png" alt="LK Studio" class="welcome-logo" width="120" height="120" />
+              <div class="welcome-hero-text">
+                <p id="welcomeTyping" class="welcome-desc typing-line" aria-live="polite"></p>
+                <p id="taglineTyping" class="welcome-tagline typing-line gold-shimmer"></p>
+              </div>
+              <p id="scheduleHint" class="schedule-hint"></p>
+              <div class="salon-info" id="salonInfo"></div>
+            </div>
+          </div>
+
+          <!-- Services & tarifs -->
+          <div class="card animate-in services-section" style="--delay:0.03s">
+            <h3 class="card-title">Nos prestations</h3>
+            <div id="servicesGrid" class="services-grid"></div>
+          </div>
+
+          <!-- Indicateur d'étapes -->
+          <div class="steps-bar animate-in" style="--delay:0.05s" id="stepsBar">
+            <div class="step-item active" data-step="1"><span class="step-num">1</span><span class="step-label">Date</span></div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="2"><span class="step-num">2</span><span class="step-label">Créneau</span></div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="3"><span class="step-num">3</span><span class="step-label">Infos</span></div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="4"><span class="step-num">4</span><span class="step-label">Paiement</span></div>
+          </div>
+
+          <div class="calendar-grid">
+            <div class="calendar-left card animate-in" id="calendarCard" style="--delay:0.07s">
+              <div class="card-header">
+                <div class="month-nav">
+                  <button id="prevMonth" class="icon-btn" type="button" aria-label="Mois précédent">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                  </button>
+                  <span id="monthLabel" class="month-label"></span>
+                  <button id="nextMonth" class="icon-btn" type="button" aria-label="Mois suivant">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                </div>
+                <p class="small" id="calendarScheduleHint">Planning : 2 jours ouvrés, 2 jours off.</p>
+              </div>
+              <div class="calendar-scroll">
+                <table class="calendar" role="grid" aria-label="Calendrier">
+                  <thead>
+                    <tr><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th><th>Dim</th></tr>
+                  </thead>
+                  <tbody id="calendarBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="calendar-right card animate-in" style="--delay:0.1s" id="bookingPanel">
+              <!-- Étape 2 : créneaux -->
+              <div class="wizard-step" id="wizardStep2" hidden>
+                <div class="card-header">
+                  <h3 class="card-title">Choisissez un créneau</h3>
+                  <p id="selectedLabel" class="small">—</p>
+                </div>
+                <div class="slots" id="slotsContainer"></div>
+                <p id="slotsEmpty" class="slots-empty small">Choisissez une date pour voir les créneaux.</p>
+              </div>
+
+              <!-- Étape 3 : infos -->
+              <div class="wizard-step" id="wizardStep3" hidden>
+                <div class="card-header">
+                  <h3 class="card-title">Vos coordonnées</h3>
+                </div>
+                <div class="booking-form">
+                  <div class="form-group">
+                    <label for="nameInput">Nom <span class="optional">(optionnel)</span></label>
+                    <input id="nameInput" type="text" placeholder="Votre nom" autocomplete="name" />
+                  </div>
+                  <div class="form-group">
+                    <label for="phoneInput">Téléphone <span class="required">*</span></label>
+                    <input id="phoneInput" type="tel" placeholder="06 12 34 56 78" autocomplete="tel" inputmode="tel" />
+                  </div>
+                  <div class="form-group">
+                    <label for="emailInput">Email <span class="optional">(pour confirmation)</span></label>
+                    <input id="emailInput" type="email" placeholder="vous@email.com" autocomplete="email" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Étape 4 : paiement -->
+              <div class="wizard-step" id="wizardStep4" hidden>
+                <div class="card-header">
+                  <h3 class="card-title">Confirmation & paiement</h3>
+                  <p id="paymentModeHint" class="small"></p>
+                </div>
+                <div class="recap recap-full">
+                  <div class="recap-row"><span>Prestation</span><strong id="sumService">—</strong></div>
+                  <div class="recap-row"><span>Date</span><strong id="sumDate">—</strong></div>
+                  <div class="recap-row"><span>Heure</span><strong id="sumTime">—</strong></div>
+                  <div class="recap-row recap-highlight"><span>Dépôt à payer</span><strong id="sumDeposit">—</strong></div>
+                </div>
+                <button id="payBtn" class="btn btn-primary btn-block" type="button" disabled>
+                  Confirmer & payer le dépôt
+                </button>
+              </div>
+
+              <!-- Étape 1 hint -->
+              <div class="wizard-step" id="wizardStep1">
+                <div class="step-hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <p>Sélectionnez une <strong>date</strong> dans le calendrier pour commencer.</p>
+                </div>
+              </div>
+
+              <div class="wizard-nav">
+                <button id="wizardBack" class="btn btn-secondary" type="button" hidden>Retour</button>
+                <button id="wizardNext" class="btn btn-primary" type="button" hidden disabled>Continuer</button>
+              </div>
+
+              <button id="cancelBtn" class="btn btn-secondary btn-block cancel-my-btn" type="button" disabled>Annuler ma réservation</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABLEAU DE BORD -->
+        <section id="panel-dashboard" class="panel">
+          <div class="stats-grid">
+            <div class="stat-card animate-in" style="--delay:0s">
+              <svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <div id="statToday" class="stat-value">0</div>
+              <div class="stat-label">Aujourd'hui</div>
+            </div>
+            <div class="stat-card animate-in" style="--delay:0.05s">
+              <svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <div id="statPending" class="stat-value">0</div>
+              <div class="stat-label">En attente</div>
+            </div>
+            <div class="stat-card animate-in" style="--delay:0.1s">
+              <svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <div id="statConfirmed" class="stat-value">0</div>
+              <div class="stat-label">Confirmées</div>
+            </div>
+            <div class="stat-card animate-in" style="--delay:0.15s">
+              <svg class="stat-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <div id="statRevenue" class="stat-value">0€</div>
+              <div class="stat-label">Revenus du mois</div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="card animate-in" style="--delay:0.2s">
+              <div class="card-title">Prochains rendez-vous</div>
+              <div id="upcomingList" class="upcoming-list"></div>
+            </div>
+            <div class="card animate-in" style="--delay:0.25s">
+              <div class="card-title">Statistiques avancées</div>
+              <div id="advancedStats" class="advanced-stats"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AGENDA -->
+        <section id="panel-agenda" class="panel">
+          <div class="card animate-in">
+            <div class="card-header row-between">
+              <div class="card-title">Toutes les réservations</div>
+              <div class="row">
+                <button id="exportAgenda" class="btn btn-secondary btn-sm" type="button">Exporter CSV</button>
+                <span id="agendaCount" class="badge">0</span>
+              </div>
+            </div>
+            <div class="table-wrap desktop-only">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th><th>Heure</th><th>Client</th><th>Téléphone</th><th>Statut</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="agendaBody"></tbody>
+              </table>
+            </div>
+            <div id="agendaCards" class="agenda-cards mobile-only"></div>
+          </div>
+        </section>
+
+        <!-- CLIENTS -->
+        <section id="panel-clients" class="panel">
+          <div class="card animate-in">
+            <div class="card-header row-between">
+              <div class="card-title">Fichier clients</div>
+              <span id="clientsCount" class="badge">0</span>
+            </div>
+            <div class="form-group">
+              <input id="clientSearch" type="search" placeholder="Rechercher par nom ou téléphone…" />
+            </div>
+            <div id="clientsList" class="clients-list"></div>
+          </div>
+          <div class="card animate-in" id="clientDetailCard" hidden style="--delay:0.05s">
+            <div class="card-header row-between">
+              <div class="card-title" id="clientDetailName">Client</div>
+              <button id="closeClientDetail" class="btn btn-ghost btn-sm" type="button">Fermer</button>
+            </div>
+            <p class="small" id="clientDetailPhone"></p>
+            <div class="form-group" style="margin-top:12px">
+              <label for="clientNotes">Notes internes</label>
+              <textarea id="clientNotes" rows="3" placeholder="Préférences, allergies, style habituel…"></textarea>
+              <button id="saveClientNotes" class="btn btn-primary btn-sm" style="margin-top:8px" type="button">Enregistrer les notes</button>
+            </div>
+            <div class="card-title" style="margin-top:16px;font-size:0.9rem">Historique</div>
+            <div id="clientHistory" class="client-history"></div>
+          </div>
+        </section>
+
+        <!-- PARAMÈTRES -->
+        <section id="panel-settings" class="panel">
+          <div class="card animate-in">
+            <div class="card-title">Horaires & planning</div>
+            <div class="settings-grid">
+              <div class="form-group">
+                <label for="setWorkCycle">Planning salon</label>
+                <select id="setWorkCycle">
+                  <option value="2-2">2 jours ouvrés / 2 jours off</option>
+                  <option value="1-1">1 jour ouvré / 1 jour off</option>
+                  <option value="3-1">3 jours ouvrés / 1 jour off</option>
+                  <option value="7-0">Tous les jours</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="setOpen">Ouverture</label>
+                <input id="setOpen" type="number" min="6" max="12" />
+              </div>
+              <div class="form-group">
+                <label for="setClose">Fermeture</label>
+                <input id="setClose" type="number" min="14" max="23" />
+              </div>
+              <div class="form-group">
+                <label for="setSlot">Créneaux (min)</label>
+                <select id="setSlot">
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                  <option value="60">60</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="setDeposit">Dépôt (€)</label>
+                <input id="setDeposit" type="number" min="0" step="5" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card animate-in" style="--delay:0.05s">
+            <div class="card-title">Message d'accueil</div>
+            <div class="form-group">
+              <textarea id="adminComment" rows="4" placeholder="Message affiché aux clients…"></textarea>
+            </div>
+            <div class="settings-grid">
+              <div class="form-group">
+                <label for="setSalonPhone">Téléphone salon</label>
+                <input id="setSalonPhone" type="tel" />
+              </div>
+              <div class="form-group">
+                <label for="setSalonAddress">Adresse</label>
+                <input id="setSalonAddress" type="text" />
+              </div>
+            </div>
+            <button id="saveSettings" class="btn btn-primary" type="button">Enregistrer les paramètres</button>
+          </div>
+
+          <div class="card animate-in" style="--delay:0.1s">
+            <div class="card-title">Bloquer des créneaux</div>
+            <p class="small" style="margin-bottom:14px">Fermez une journée entière ou un créneau précis (congés, pause…).</p>
+            <div class="settings-grid">
+              <div class="form-group">
+                <label for="blockDate">Date</label>
+                <input id="blockDate" type="date" />
+              </div>
+              <div class="form-group">
+                <label for="blockTime">Heure <span class="optional">(vide = journée entière)</span></label>
+                <input id="blockTime" type="time" />
+              </div>
+              <div class="form-group">
+                <label for="blockReason">Motif</label>
+                <input id="blockReason" type="text" placeholder="Congés, formation…" />
+              </div>
+            </div>
+            <button id="addBlockBtn" class="btn btn-secondary" type="button">Bloquer</button>
+            <div id="blockedList" class="blocked-list" style="margin-top:16px"></div>
+          </div>
+
+          <div class="card animate-in" style="--delay:0.15s">
+            <div class="card-header row-between">
+              <div class="card-title">Notifications (Phase 5)</div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="setNotifications" checked />
+                <span>Actives</span>
+              </label>
+            </div>
+            <p class="small" style="margin-bottom:12px">Confirmations, rappels J-1 (SMS simulé si Twilio non configuré). Emails via SMTP ou journal local.</p>
+            <div class="row" style="gap:8px;margin-bottom:12px">
+              <button id="testNotification" class="btn btn-secondary btn-sm" type="button">Envoyer un test</button>
+              <button id="refreshNotifications" class="btn btn-ghost btn-sm" type="button">Actualiser le journal</button>
+            </div>
+            <div id="notificationsLog" class="notifications-log"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Navigation mobile bas -->
+    <nav class="bottom-nav" id="bottomNav" aria-label="Navigation mobile">
+      <button class="bottom-nav-btn active" data-panel="reserve" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Réserver</span>
+      </button>
+      <button class="bottom-nav-btn" data-panel="dashboard" data-admin type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="bottom-nav-btn" data-panel="agenda" data-admin type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <span>Agenda</span>
+      </button>
+      <button class="bottom-nav-btn" data-panel="settings" data-admin type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Réglages</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Modal confirmation réservation -->
+  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true" hidden>
+    <div class="modal confirm-modal animate-scale">
+      <div class="confirm-check">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="confirm-title">Réservation confirmée !</h2>
+      <p class="small confirm-sub">À bientôt chez LK Studio</p>
+      <div class="recap recap-full" id="confirmRecap"></div>
+      <button id="confirmCloseBtn" class="btn btn-primary btn-block" type="button">Nouvelle réservation</button>
+    </div>
+  </div>
+
+  <!-- Modal admin -->
+  <div id="loginModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle" hidden>
+    <div class="modal animate-scale">
+      <div class="modal-header">
+        <img src="/assets/logo.png" alt="" class="modal-logo" width="64" height="64" />
+        <h2 id="loginTitle">Connexion admin</h2>
+      </div>
+      <p class="small modal-desc">Accédez à l'espace de gestion du salon.</p>
+      <div class="form-group">
+        <label for="adminPassword">Mot de passe</label>
+        <input id="adminPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <div class="modal-actions">
+        <button id="loginSubmit" class="btn btn-primary" style="flex:1" type="button">Connexion</button>
+        <button id="loginCancel" class="btn btn-secondary" type="button">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="/js/typing.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "bookings": [],
+  "blockedSlots": [],
+  "clientNotes": {},
+  "settings": {
+    "workDays": 2,
+    "offDays": 2,
+    "cycleAnchor": null,
+    "openingHour": 9,
+    "closingHour": 19,
+    "slotIntervalMin": 30,
+    "pendingTimeoutSec": 900,
+    "depositAmount": 15,
+    "adminComment": "Bienvenue — réservez votre créneau en quelques clics.",
+    "salonPhone": "06 00 00 00 00",
+    "salonAddress": "Votre adresse ici",
+    "notificationsEnabled": true,
+    "services": [
+      { "id": "s1", "name": "Coupe", "price": 25, "duration": 30, "description": "Coupe classique, fade ou dégradé" },
+      { "id": "s2", "name": "Barbe", "price": 15, "duration": 20, "description": "Taille, contours et finitions" },
+      { "id": "s3", "name": "Combo", "price": 35, "duration": 50, "description": "Coupe + barbe — forfait complet" }
+    ]
+  }
+}

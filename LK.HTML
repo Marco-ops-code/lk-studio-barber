@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Rendez-vous - LK Studio BarberShop</title>
+<style>
+:root{
+  --primary:#d4af37; --dark:#222; --light:#fff; --success:#28a745; --muted:#ddd;
+}
+*{box-sizing:border-box; font-family:Segoe UI, Roboto, Arial;}
+body{background:#f5f5f5; color:var(--dark); padding:18px;}
+.container{max-width:1100px;margin:0 auto;background:var(--light);border-radius:10px;padding:18px;box-shadow:0 6px 20px rgba(0,0,0,0.06);}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.brand{font-weight:700;font-size:1.4rem}
+.controls{display:flex;gap:8px;align-items:center;}
+button{cursor:pointer}
+.calendar-grid{display:flex;gap:18px;flex-wrap:wrap}
+.left{flex:1;min-width:320px}
+.right{width:380px;min-width:260px;background:#fafafa;padding:12px;border-radius:8px;border:1px solid #eee}
+.calendar{width:100%;border-collapse:collapse}
+.calendar th{background:var(--dark);color:white;padding:8px}
+.calendar td{height:72px;padding:8px;border:1px solid #eee;cursor:pointer;vertical-align:top}
+.calendar td.disabled{background:#fafafa;color:#bbb;cursor:not-allowed}
+.calendar td.open-day{background:#fff}
+.calendar td.selected{outline:3px solid var(--primary)}
+.small{font-size:0.85rem;color:#666}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.slot{padding:8px;border-radius:6px;border:1px solid #ddd;background:white;text-align:center;cursor:pointer}
+.slot:hover{transform:translateY(-2px)}
+.slot.booked{background:#f0f0f0;color:#888;cursor:not-allowed}
+.slot.mine{background:#eaf7ea;border-color:#2b8a3e;color:#135a22} /* réservé par ce client */
+.slot.pending{background:#fff7e6;border-color:#f0b429}
+.summary{margin-top:14px}
+.admin-area{margin-top:12px;border-top:1px dashed #eee;padding-top:10px;display:none}
+.badge{background:#eee;padding:4px 8px;border-radius:6px;font-size:0.85rem}
+.row{display:flex;gap:8px;align-items:center}
+.toggle{padding:6px 10px;border-radius:6px;border:1px solid #ddd;background:white}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand">LK Barber<span style="color:var(--primary)">Studio</span></div>
+    <div class="controls">
+      <label class="small">Mode:</label>
+      <select id="modeSelect" class="toggle">
+        <option value="simulation">Simulation (local)</option>
+        <option value="live">Live (backend)</option>
+      </select>
+      <label class="small">Pattern:</label>
+      <select id="patternSelect" class="toggle" title="Intervalle d'ouverture">
+        <option value="2">2 jours sur 2 (par défaut)</option>
+        <option value="1">Ouvert tous les jours</option>
+        <option value="3">1 jour sur 3</option>
+      </select>
+      <button id="adminToggle" class="toggle">Se connecter admin</button>
+    </div>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="left">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <button id="prevMonth">&larr;</button>
+          <span id="monthLabel" style="margin:0 8px;font-weight:600"></span>
+          <button id="nextMonth">&rarr;</button>
+        </div>
+        <div class="small">Les jours ouverts suivent le pattern choisi.</div>
+      </div>
+
+      <table class="calendar" aria-hidden>
+        <thead>
+          <tr><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th><th>Dim</th></tr>
+        </thead>
+        <tbody id="calendarBody"></tbody>
+      </table>
+    </div>
+
+    <div class="right">
+      <div>
+        <div class="row" style="justify-content:space-between">
+          <div><strong>Choix</strong></div>
+          <div><span id="statusBadge" class="badge">Inactif</span></div>
+        </div>
+        <p id="selectedLabel" class="small" style="margin-top:6px">Aucune date sélectionnée</p>
+        <div class="slots" id="slotsContainer"></div>
+
+        <div class="summary">
+          <div><strong>Récapitulatif</strong></div>
+          <p class="small">Date: <span id="sumDate">-</span></p>
+          <p class="small">Heure: <span id="sumTime">-</span></p>
+          <div style="margin-top:8px">
+            <input id="phoneInput" placeholder="Téléphone pour paiement" style="width:100%;padding:8px;margin-bottom:6px" />
+            <button id="payBtn" style="width:100%;padding:10px;background:var(--primary);color:white;border:none;border-radius:6px" disabled>Payer dépôt & réserver</button>
+            <button id="cancelBtn" style="width:100%;padding:8px;margin-top:6px;background:#fff;border:1px solid #ddd;border-radius:6px" disabled>Annuler ma réservation</button>
+          </div>
+        </div>
+
+        <div class="admin-area" id="adminArea">
+          <div style="margin-top:10px"><strong>Commentaire admin</strong></div>
+          <textarea id="adminComment" rows="4" style="width:100%;margin-top:6px"></textarea>
+          <div style="margin-top:6px;display:flex;gap:8px">
+            <button id="saveComment">Enregistrer (Admin)</button>
+            <button id="logoutAdmin">Se déconnecter admin</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Frontend JS: simulation/local OR live backend via API.
+   - patternInterval: configurable (2 = 2 jours sur 2)
+   - Booking states: free / pending / confirmed
+   - In simulation: stockage dans localStorage
+   - In live: appels fetch vers /api/*
+*/
+
+/* ----------------- CONFIG ----------------- */
+const CONFIG = {
+  daysToShow: 60,
+  slotIntervalMin: 30,
+  openingHour: 9,
+  closingHour: 19,
+  pendingTimeoutSec: 15 * 60, // 15 min
+  apiBase: '' // en live: http://ton-serveur:3000
+};
+
+/* --------------- ÉTAT CLIENT -------------- */
+let mode = localStorage.getItem('lk_mode') || 'simulation';
+let patternInterval = parseInt(localStorage.getItem('lk_pattern') || '2', 10);
+let currentDate = new Date();
+let selectedDate = null; // Date object
+let selectedTime = null; // "HH:MM"
+let currentUser = JSON.parse(localStorage.getItem('lk_user')||JSON.stringify({id: 'u_'+Math.random().toString(36).slice(2,9), isAdmin:false}));
+let bookings = []; // chargé depuis localStorage ou serveur
+let adminToken = localStorage.getItem('lk_admin_token') || null;
+
+/* --------------- DOM refs ----------------- */
+const modeSelect = document.getElementById('modeSelect');
+const patternSelect = document.getElementById('patternSelect');
+const monthLabel = document.getElementById('monthLabel');
+const calendarBody = document.getElementById('calendarBody');
+const prevMonth = document.getElementById('prevMonth');
+const nextMonth = document.getElementById('nextMonth');
+const selectedLabel = document.getElementById('selectedLabel');
+const slotsContainer = document.getElementById('slotsContainer');
+const sumDate = document.getElementById('sumDate');
+const sumTime = document.getElementById('sumTime');
+const payBtn = document.getElementById('payBtn');
+const phoneInput = document.getElementById('phoneInput');
+const statusBadge = document.getElementById('statusBadge');
+const adminToggle = document.getElementById('adminToggle');
+const adminArea = document.getElementById('adminArea');
+const adminComment = document.getElementById('adminComment');
+const saveCommentBtn = document.getElementById('saveComment');
+const logoutAdminBtn = document.getElementById('logoutAdmin');
+const cancelBtn = document.getElementById('cancelBtn');
+
+/* --------------- Init UI ------------------ */
+modeSelect.value = mode;
+patternSelect.value = String(patternInterval);
+renderAdminArea();
+loadBookings().then(()=> renderCalendar());
+
+/* -------------- Event listeners ------------ */
+modeSelect.addEventListener('change', ()=>{ mode = modeSelect.value; localStorage.setItem('lk_mode', mode); loadBookings().then(()=>renderCalendar()); });
+patternSelect.addEventListener('change', ()=>{ patternInterval = parseInt(patternSelect.value,10); localStorage.setItem('lk_pattern', patternInterval); renderCalendar(); });
+prevMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); });
+nextMonth.addEventListener('click', ()=>{ currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); });
+payBtn.addEventListener('click', handlePay);
+adminToggle.addEventListener('click', ()=>{ if(!currentUser.isAdmin) promptAdminLogin(); else { currentUser.isAdmin=false; localStorage.setItem('lk_user', JSON.stringify(currentUser)); renderAdminArea(); }});
+saveCommentBtn.addEventListener('click', saveAdminComment);
+logoutAdminBtn.addEventListener('click', ()=>{ currentUser.isAdmin=false; localStorage.setItem('lk_user', JSON.stringify(currentUser)); renderAdminArea();});
+cancelBtn.addEventListener('click', handleCancelMyFirstBooking);
+
+/* -------------- Helper functions ------------ */
+
+function startOfDayISO(d){ const x=new Date(d); x.setHours(0,0,0,0); return x.toISOString().slice(0,10); }
+function slotId(dateISO,time){ return `${dateISO}__${time}`; }
+
+/* Determine if a day is open given the pattern interval. Uses a stable starting point: today. */
+function isOpenDay(isoDate){
+  const start = new Date(); start.setHours(0,0,0,0);
+  const d = new Date(isoDate);
+  const diffDays = Math.floor((d - start)/(24*3600*1000));
+  return (diffDays % patternInterval) === 0;
+}
+
+/* Load bookings: local (localStorage) OR live (fetch /api/bookings) */
+async function loadBookings(){
+  if(mode==='simulation'){
+    bookings = JSON.parse(localStorage.getItem('lk_bookings') || '[]');
+  } else {
+    try {
+      const resp = await fetch((CONFIG.apiBase || '') + '/api/bookings');
+      if(resp.ok) bookings = await resp.json();
+      else { console.error('Erreur API bookings', resp.status); bookings = []; }
+    } catch(err){ console.error('Erreur fetch bookings', err); bookings = []; }
+  }
+  // ensure pending timeouts in simulation: remove expired pending
+  if(mode==='simulation'){
+    const now = Date.now();
+    let changed=false;
+    bookings = bookings.filter(b=>{
+      if(b.status==='pending' && b.pendingUntil && (new Date(b.pendingUntil)).getTime() < now){
+        changed=true; return false; // drop expired pending
+      }
+      return true;
+    });
+    if(changed) localStorage.setItem('lk_bookings', JSON.stringify(bookings));
+  }
+  updateStatusBadge();
+}
+
+/* Persist booking in simulation */
+function persistBookingSim(){
+  localStorage.setItem('lk_bookings', JSON.stringify(bookings));
+}
+
+/* Render calendar for month */
+function renderCalendar(){
+  monthLabel.textContent = currentDate.toLocaleString('fr-FR',{month:'long',year:'numeric'});
+  calendarBody.innerHTML = '';
+  // first day Monday alignment
+  const year = currentDate.getFullYear(), month = currentDate.getMonth();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month+1, 0);
+  let firstWeekday = first.getDay(); // 0=Sunday
+  firstWeekday = firstWeekday===0?6:firstWeekday-1; // 0=Mon
+
+  let date = 1;
+  for(let r=0;r<6;r++){
+    const tr = document.createElement('tr');
+    for(let c=0;c<7;c++){
+      const td = document.createElement('td');
+      if(r===0 && c<firstWeekday){ td.classList.add('disabled'); }
+      else if(date>last.getDate()){ td.classList.add('disabled'); }
+      else {
+        const d = new Date(year, month, date);
+        const iso = startOfDayISO(d);
+        const today = new Date(); today.setHours(0,0,0,0);
+        td.textContent = date;
+        if(d < today) td.classList.add('disabled');
+        else {
+          // check open/closed
+          if(!isOpenDay(iso)) td.classList.add('disabled');
+          else td.classList.add('open-day');
+          // mark if user has a booking that day
+          const hasMine = bookings.some(b=> b.date===iso && b.userId===currentUser.id && b.status==='confirmed');
+          if(hasMine) td.style.boxShadow = 'inset 0 0 0 3px rgba(43,138,62,0.12)';
+          td.addEventListener('click', ()=>{ if(!td.classList.contains('disabled')) selectDate(d); });
+        }
+        date++;
+      }
+      tr.appendChild(td);
+    }
+    calendarBody.appendChild(tr);
+    if(date>last.getDate()) break;
+  }
+}
+
+/* When date selected: render slots */
+function selectDate(d){
+  selectedDate = d;
+  selectedTime = null;
+  selectedLabel.textContent = d.toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  sumDate.textContent = selectedLabel.textContent;
+  sumTime.textContent = '-';
+  renderSlotsForDate(d);
+  payBtn.disabled = true;
+}
+
+/* Generate slots from opening to closing */
+function renderSlotsForDate(d){
+  slotsContainer.innerHTML = '';
+  const iso = startOfDayISO(d);
+  const opening = CONFIG.openingHour, closing = CONFIG.closingHour;
+  for(let h=opening; h<closing; h++){
+    for(let m=0; m<60; m+=CONFIG.slotIntervalMin){
+      const time = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+      const slotEl = document.createElement('div');
+      slotEl.className='slot';
+      slotEl.textContent = time;
+      // check booking
+      const b = bookings.find(x=> x.date===iso && x.time===time);
+      if(b){
+        if(b.status==='confirmed'){
+          if(b.userId===currentUser.id) slotEl.classList.add('mine');
+          else slotEl.classList.add('booked');
+        } else if(b.status==='pending'){
+          if(b.userId===currentUser.id) slotEl.classList.add('mine','pending');
+          else slotEl.classList.add('pending');
+          slotEl.title = 'Paiement en cours pour ce créneau';
+        }
+      } else {
+        slotEl.addEventListener('click', ()=> selectTime(iso, time, slotEl));
+      }
+      slotsContainer.appendChild(slotEl);
+    }
+  }
+}
+
+/* Select a time-slot */
+function selectTime(dateISO, time, slotEl){
+  selectedTime = time;
+  // visual
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  slotEl.classList.add('selected');
+  sumDate.textContent = selectedLabel.textContent;
+  sumTime.textContent = selectedTime;
+  payBtn.disabled = false;
+}
+
+/* Update status badge */
+function updateStatusBadge(){
+  statusBadge.textContent = mode==='simulation' ? 'Simulation' : 'Live';
+}
+
+/* Admin UI */
+function renderAdminArea(){
+  if(currentUser.isAdmin){
+    adminArea.style.display = 'block';
+    adminToggle.textContent = 'Admin: connecté';
+    // load comment
+    if(mode==='simulation') adminComment.value = localStorage.getItem('lk_admin_comment')||'';
+    else fetch((CONFIG.apiBase||'') + '/api/admin/comment', { headers: adminToken ? {'x-admin-token': adminToken} : {} })
+      .then(r=> r.ok ? r.json() : null).then(data=>{ if(data && data.comment) adminComment.value = data.comment; }).catch(()=>{});
+  } else {
+    adminArea.style.display = 'none';
+    adminToggle.textContent = 'Se connecter admin';
+  }
+}
+
+/* Simple admin login prompt (demo). In prod: remplace par auth. */
+function promptAdminLogin(){
+  const pw = prompt('Entrez le code admin:');
+  if(!pw) return;
+  // pour simulation: le code 'admin123' active admin local
+  if(mode==='simulation' && pw==='admin123'){
+    currentUser.isAdmin = true; localStorage.setItem('lk_user', JSON.stringify(currentUser)); renderAdminArea(); alert('Admin connecté (simulation).'); return;
+  }
+  // pour live: échanger contre token via backend
+  if(mode==='live'){
+    fetch((CONFIG.apiBase||'') + '/api/admin/login', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password:pw})
+    }).then(r=> r.json()).then(j=>{
+      if(j && j.token){ adminToken = j.token; localStorage.setItem('lk_admin_token', adminToken); currentUser.isAdmin=true; localStorage.setItem('lk_user', JSON.stringify(currentUser)); renderAdminArea(); alert('Admin connecté (live).'); }
+      else alert('Auth admin échouée.');
+    }).catch(e=>{ console.error(e); alert('Erreur login admin'); });
+  } else {
+    alert('Code admin incorrect.');
+  }
+}
+
+/* Save admin comment */
+function saveAdminComment(){
+  const comment = adminComment.value;
+  if(mode==='simulation'){
+    localStorage.setItem('lk_admin_comment', comment); alert('Commentaire admin sauvegardé (simulation).');
+  } else {
+    fetch((CONFIG.apiBase||'') + '/api/admin/comment', {
+      method:'POST', headers:{'Content-Type':'application/json', 'x-admin-token': adminToken||''},
+      body: JSON.stringify({comment})
+    }).then(r=> r.ok ? alert('Commentaire enregistré.') : alert('Erreur enregistrement'));
+  }
+}
+
+/* ---------- Booking flow: pay & confirm (simu or live) ---------- */
+async function handlePay(){
+  if(!selectedDate || !selectedTime){ alert('Sélectionne une date et un créneau.'); return; }
+  const phone = phoneInput.value.trim();
+  if(!phone){ alert('Renseigne un numéro de téléphone.'); return; }
+
+  const bookingPayload = {
+    date: startOfDayISO(selectedDate),
+    time: selectedTime,
+    userId: currentUser.id,
+    phone
+  };
+
+  if(mode==='simulation'){
+    // check availability
+    await loadBookings();
+    if(bookings.find(b=> b.date===bookingPayload.date && b.time===bookingPayload.time && b.status!=='cancelled')){
+      alert('Désolé, ce créneau est déjà pris.');
+      await loadBookings(); renderSlotsForDate(selectedDate); return;
+    }
+    // create pending booking local
+    const id = 'b_'+Math.random().toString(36).slice(2,9);
+    const pendingUntil = new Date(Date.now() + CONFIG.pendingTimeoutSec*1000).toISOString();
+    const newB = { id, date:bookingPayload.date, time:bookingPayload.time, userId:bookingPayload.userId, phone, status:'pending', createdAt:new Date().toISOString(), pendingUntil };
+    bookings.push(newB);
+    persistBookingSim();
+    alert('Paiement (simulé) : clique OK pour simuler paiement réussi.');
+    // simulate payment confirmation
+    const ok = confirm('Simuler réussite du paiement maintenant ?');
+    if(ok){
+      // mark confirmed
+      const idx = bookings.findIndex(x=>x.id===id);
+      bookings[idx].status='confirmed';
+      delete bookings[idx].pendingUntil;
+      persistBookingSim();
+      alert('Réservation confirmée (simulation).');
+      renderCalendar(); renderSlotsForDate(selectedDate);
+      payBtn.disabled=true;
+      cancelBtn.disabled=false;
+    } else {
+      // simulate non-payment -> leave pending until timeout or remove
+      alert('Paiement non finalisé. Le créneau reste en attente pendant 15 min.');
+      renderCalendar(); renderSlotsForDate(selectedDate);
+    }
+    return;
+  }
+
+  // ---------- LIVE MODE ----------
+  try {
+    // 1) create booking intent on server
+    const resp = await fetch((CONFIG.apiBase||'') + '/api/create-booking-intent', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(bookingPayload)
+    });
+    if(!resp.ok){ const err = await resp.json().catch(()=>({})); alert('Erreur création booking: '+(err.error||resp.status)); await loadBookings(); renderSlotsForDate(selectedDate); return; }
+    const data = await resp.json();
+    // expected: { client_secret, bookingId, publishableKey, checkoutUrl }
+    // If server returns checkoutUrl (Redirect to Stripe Checkout), open it
+    if(data.checkoutUrl){
+      window.location.href = data.checkoutUrl; // user will be returned via webhook/email
+      return;
+    }
+    // If client_secret returned -> use Stripe.js in page to confirm card; for demo we simply prompt to simulate success
+    // In production you would call Stripe.confirmCardPayment(client_secret, {payment_method: {...}})
+    if(confirm('Simuler paiement (live) maintenant ? OK = paiement réussi')){
+      // notify server to mark confirmed (in production server marks confirmed via webhook)
+      const confirmResp = await fetch((CONFIG.apiBase||'') + '/api/confirm-booking', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({bookingId: data.bookingId})
+      });
+      if(confirmResp.ok){
+        alert('Réservation confirmée (live).');
+        await loadBookings();
+        renderCalendar(); renderSlotsForDate(selectedDate);
+        payBtn.disabled=true; cancelBtn.disabled=false;
+      } else {
+        const err = await confirmResp.json().catch(()=>({})); alert('Erreur confirm: '+(err.error||confirmResp.status));
+      }
+    } else {
+      alert('Paiement annulé.');
+      // optionally call server to cancel pending
+      await fetch((CONFIG.apiBase||'') + '/api/cancel-pending', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({bookingId: (await resp.json()).bookingId}) }).catch(()=>{});
+    }
+  } catch(e){ console.error(e); alert('Erreur lors du process paiement.'); }
+}
+
+/* Cancel booking (first found for this user) */
+async function handleCancelMyFirstBooking(){
+  await loadBookings();
+  const my = bookings.find(b=> b.userId===currentUser.id && (b.status==='confirmed' || b.status==='pending'));
+  if(!my){ alert('Aucune réservation à annuler.'); return; }
+  if(!confirm(`Annuler la réservation ${my.date} ${my.time} ?`)) return;
+  if(mode==='simulation'){
+    bookings = bookings.filter(b=> b.id!==my.id);
+    persistBookingSim();
+    alert('Annulation effectuée (simulation). Le créneau est de nouveau disponible.');
+    renderCalendar(); renderSlotsForDate(selectedDate);
+    cancelBtn.disabled=true;
+    return;
+  }
+  // live
+  try {
+    const r = await fetch((CONFIG.apiBase||'') + '/api/cancel-booking', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({bookingId: my.id}) });
+    if(r.ok){ alert('Annulation demandée. Le remboursement (si applicable) sera traité.'); await loadBookings(); renderCalendar(); renderSlotsForDate(selectedDate); }
+    else { const j=await r.json().catch(()=>({})); alert('Erreur annulation: ' + (j.error||r.status)); }
+  } catch(e){ console.error(e); alert('Erreur annulation'); }
+}
+
+/* Cancel first booking helper (for button state) */
+function checkCancelButtonState(){
+  const has = bookings.some(b=> b.userId===currentUser.id && (b.status==='confirmed' || b.status==='pending'));
+  cancelBtn.disabled = !has;
+}
+
+/* After any bookings load, refresh UI */
+setInterval(()=>{ loadBookings().then(()=> { if(selectedDate) renderSlotsForDate(selectedDate); renderCalendar(); checkCancelButtonState(); }); }, 30*1000);
+
+/* initial small update after load */
+loadBookings().then(()=> { if(selectedDate) renderSlotsForDate(selectedDate); checkCancelButtonState(); });
+
+/* End */
+</script>
+</body>
+</html>
