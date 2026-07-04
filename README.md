@@ -84,3 +84,33 @@ Sans SMTP : les messages sont enregistrés dans `data/notifications.json`.
 | GET | `/api/admin/notifications` | Journal notifications (admin) |
 | GET | `/api/payment/verify` | Vérifier paiement Stripe |
 | POST | `/api/stripe/webhook` | Webhook Stripe |
+
+## Déploiement via GitHub
+
+Le dépôt est configuré pour travailler directement sur GitHub :
+
+**Dépôt :** https://github.com/Marco-ops-code/lk-studio-barber
+
+### Workflows GitHub Actions
+
+| Fichier | Rôle |
+|---------|------|
+| `.github/workflows/ci.yml` | Vérifie le projet à chaque push/PR |
+| `.github/workflows/deploy-render.yml` | Déploie sur Render (si secret configuré) |
+| `.github/workflows/azure-webapps-node.yml` | Option Azure (si secret configuré) |
+
+### Base de données en production
+
+Les données (réservations, paramètres) sont stockées dans des fichiers JSON.
+En production, définissez `DATA_DIR=/var/data` pour un stockage persistant
+(le dossier `data/` du dépôt sert de modèle initial).
+
+### Déployer sur Render (recommandé)
+
+1. Créez un compte sur [render.com](https://render.com)
+2. **New → Blueprint** → connectez le dépôt GitHub `lk-studio-barber`
+3. Render lit `render.yaml` (disque persistant 1 Go sur `/var/data`)
+4. Ajoutez les variables d'environnement (`ADMIN_PASSWORD`, `APP_URL`, Stripe, SMTP…)
+5. Optionnel : copiez le **Deploy Hook** Render dans les secrets GitHub `RENDER_DEPLOY_HOOK`
+
+Chaque push sur `main` déclenche alors la CI, puis le déploiement automatique.

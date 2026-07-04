@@ -8,10 +8,11 @@ const { v4: uuidv4 } = require('uuid');
 const payments = require('./lib/payments');
 const notifications = require('./lib/notifications');
 const schedule = require('./lib/schedule');
+const { seedDataFile } = require('./lib/paths');
 
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-const DATA_FILE = path.join(__dirname, 'data', 'store.json');
+const DATA_FILE = seedDataFile('store.json');
 
 const app = express();
 app.use(cors());
